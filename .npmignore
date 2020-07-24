@@ -9,3 +9,6 @@ src/
 images/
 .github/
 .travis.yml
+/.idea
+/tests
+/yarn.lock

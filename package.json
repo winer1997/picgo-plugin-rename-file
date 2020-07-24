@@ -1,6 +1,6 @@
 {
   "name": "picgo-plugin-rename-file",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A PicGo plugin for customizing file name",
   "main": "dist/index.js",
   "publishConfig": {
@@ -35,8 +35,5 @@
     "tslint-config-standard": "^7.1.0",
     "typescript": "^3.0.3"
   },
-  "dependencies": {
-    "crypto-js": "^4.0.0",
-    "randomstring": "^1.1.5"
-  }
+  "dependencies": {}
 }
