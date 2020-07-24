@@ -1,30 +1,23 @@
 import picgo from 'picgo'
-import dayjs from 'dayjs'
+const path = require('path')
+const crypto = require('crypto')
 
 function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time))
 }
 
 const pluginConfig = ctx => {
-  let userConfig = ctx.getConfig('picgo-plugin-super-prefix')
+  let userConfig = ctx.getConfig('picgo-plugin-rename-file')
   if (!userConfig) {
     userConfig = {}
   }
   return [
     {
-      name: 'prefixFormat',
+      name: 'format',
       type: 'input',
-      alias: '文件名个性前缀格式(以/结尾)',
-      default: userConfig.prefixFormat || '',
-      message: '例如 YYYY/MM/DD/',
-      required: false
-    },
-    {
-      name: 'fileFormat',
-      type: 'input',
-      alias: '文件名个性格式',
-      default: userConfig.fileFormat || '',
-      message: '例如 YYYYMMDDHHmmss',
+      alias: '文件(路径)格式',
+      default: userConfig.format || '',
+      message: '例如 fix-dir/{localFolder:2}/{y}/{m}/{d}/{h}-{i}-{s}-{hash}-{origin}-{rand:5}',
       required: false
     }
   ]
@@ -32,46 +25,79 @@ const pluginConfig = ctx => {
 
 export = (ctx: picgo) => {
   const register = () => {
-    ctx.helper.beforeUploadPlugins.register('super-prefix', {
-      async handle (ctx) {
+    ctx.helper.beforeUploadPlugins.register('rename-file', {
+      handle: async function (ctx) {
         // console.log(ctx)
         const autoRename = ctx.getConfig('settings.autoRename')
         if (autoRename) {
           ctx.emit('notification', {
             title: '❌ 警告',
-            body: '请关闭 PicGo 的 【时间戳重命名】 功能,\nsuper-prefix 插件重命名方式会被覆盖'
+            body: '请关闭 PicGo 的 【时间戳重命名】 功能,\nrename-file 插件重命名方式会被覆盖'
           })
           await sleep(10000)
-          throw new Error('super-prefix conflict')
+          throw new Error('rename-file conflict')
         }
-
-        let userConfig = ctx.getConfig('picgo-plugin-super-prefix')
-        if (!userConfig) {
-          userConfig = {
-            prefix: '',
-            fileFormat: ''
-          }
-        }
-
-        for (let i = 0; i < ctx.output.length; i++) {
-          let fileName = ctx.output[i].fileName
-          let prefix = ''
-          if (userConfig.prefixFormat != undefined && userConfig.prefixFormat != '') {
-            prefix = dayjs().format(userConfig.prefixFormat)
-          }
-
-          if (userConfig.fileFormat != undefined && userConfig.fileFormat != '') {
-            if (i > 0) {
-              fileName = prefix + dayjs().format(userConfig.fileFormat) + '-' + i + ctx.output[i].extname
-            } else {
-              fileName = prefix + dayjs().format(userConfig.fileFormat) + ctx.output[i].extname
+        const format: string = ctx.getConfig('picgo-plugin-rename-file.format') || ''
+        ctx.output = ctx.output.map((item, i) => {
+          let fileName = item.fileName
+          if (format) {
+            let currentTime = new Date()
+            let formatObject = {
+              y: currentTime.getFullYear(),
+              m: currentTime.getMonth() + 1,
+              d: currentTime.getDate(),
+              h: currentTime.getHours(),
+              i: currentTime.getMinutes(),
+              s: currentTime.getSeconds()
             }
-          }else{
-            fileName = prefix + fileName
+            // 去除空格
+            fileName = format.trim()
+              // 替换日期
+              .replace(/{([ymdhis])+}/g, (result, key) => {
+                return (formatObject[key] < 10 ? '0' : '') + formatObject[key]
+              })
+              // 截取本地目录
+              .replace(/{(localFolder:?(\d+)?)}/gi,(result,key,count) => {
+                if (ctx.input[i]) {
+                  count = Math.max(1, (count || 0))
+                  let paths = path.dirname(ctx.input[i]).split(path.sep)
+                  key = paths.slice(0 - count).reduce((a, b) => `${a}/${b}`)
+                }
+                return key.replace(/:/g, '')
+              })
+              // 随机字符串
+              .replace(/{(rand:?(\d+)?)}/ig,(result,key,count) => {
+                if (key === 'rand' || key.indexOf('rand:') === 0) {
+                  count = Math.min(Math.max(1, (count || 6)), 32)
+                  return crypto.randomBytes(Math.ceil(count / 2)).toString('hex').slice(0, count)
+                }
+               })
+              // 字符串替换
+              .replace(/{(hash|origin|\w+)}/ig,(result, key) => {
+                  // 文件原名
+                if (key === 'origin') {
+                  return fileName.substring(0, Math.max(0, fileName.lastIndexOf('.')) || fileName.length)
+                      .replace(/[\\\/:<>|"'*?$#&@()\[\]^~]+/g, '-')
+                }
+                  // 文件hash值
+                if (key === 'hash') {
+                  const hash = crypto.createHash('md5')
+                  hash.update(item.buffer)
+                  return hash.digest('hex')
+                }
+                return key
+              })
+
+            if (fileName.slice(-1) === '/') {
+              fileName += i
+            }
+
+            fileName += item.extname
           }
-          
-          ctx.output[i].fileName = fileName
-        }
+          item.fileName = fileName
+          return item
+        })
+
       },
       config: pluginConfig
     })
