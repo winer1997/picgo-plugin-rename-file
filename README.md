@@ -28,7 +28,7 @@ format，文件(路径)格式，默认为空，自定义文件路径及文件名
     
 上传文件名为`/images/test/localImage.jpg`的文件时，会重命名为
 
-    fix-dir/images/test/2020/07/24/21-40-31-36921a9c364ed4789d4bc684bcb81d62-localImage-fa2c97.png
+    fix-dir/images/test/2020/07/24/21-40-31-36921a9c364ed4789d4bc684bcb81d62-localImage-fa2c97.jpg
 
 
 
