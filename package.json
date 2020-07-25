@@ -1,6 +1,6 @@
 {
   "name": "picgo-plugin-rename-file",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A PicGo plugin for customizing file name",
   "main": "dist/index.js",
   "publishConfig": {

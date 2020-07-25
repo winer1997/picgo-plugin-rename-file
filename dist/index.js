@@ -45,13 +45,15 @@ module.exports = (ctx) => {
                             d: currentTime.getDate(),
                             h: currentTime.getHours(),
                             i: currentTime.getMinutes(),
-                            s: currentTime.getSeconds()
+                            s: currentTime.getSeconds(),
+                            ms: currentTime.getTime().toString().slice(-3),
+                            timestamp: currentTime.getTime().toString().slice(0, -3)
                         };
                         // 去除空格
                         fileName = format.trim()
                             // 替换日期
-                            .replace(/{([ymdhis])+}/g, (result, key) => {
-                            return (formatObject[key] < 10 ? '0' : '') + formatObject[key];
+                            .replace(/{(y|m|d|h|i|s|ms|timestamp)}/gi, (result, key) => {
+                            return (typeof formatObject[key] === 'number' && formatObject[key] < 10 ? '0' : '') + formatObject[key];
                         })
                             // 截取本地目录
                             .replace(/{(localFolder:?(\d+)?)}/gi, (result, key, count) => {
@@ -63,14 +65,14 @@ module.exports = (ctx) => {
                             return key.replace(/:/g, '');
                         })
                             // 随机字符串
-                            .replace(/{(rand:?(\d+)?)}/ig, (result, key, count) => {
+                            .replace(/{(rand:?(\d+)?)}/gi, (result, key, count) => {
                             if (key === 'rand' || key.indexOf('rand:') === 0) {
                                 count = Math.min(Math.max(1, (count || 6)), 32);
                                 return crypto.randomBytes(Math.ceil(count / 2)).toString('hex').slice(0, count);
                             }
                         })
                             // 字符串替换
-                            .replace(/{(hash|origin|\w+)}/ig, (result, key) => {
+                            .replace(/{(hash|origin|\w+)}/gi, (result, key) => {
                             // 文件原名
                             if (key === 'origin') {
                                 return fileName.substring(0, Math.max(0, fileName.lastIndexOf('.')) || fileName.length)
@@ -83,7 +85,9 @@ module.exports = (ctx) => {
                                 return hash.digest('hex');
                             }
                             return key;
-                        });
+                        })
+                            // 去除多余的"/"
+                            .replace(/[\/]+/g, '/');
                         if (fileName.slice(-1) === '/') {
                             fileName += i;
                         }
