@@ -42,8 +42,8 @@ format，文件(路径)格式，默认为空，自定义文件路径及文件名
 - {s} 秒，2位
 - {hash}，文件的md5值，32位
 - {origin}，文件原名（会去掉后缀）
-- {rand:<count>}, 随机数，count表示个数，默认为6个，示例：{rand：32}、{rand}
-- {localFolder:<count>}, count表示层级 ，默认为1，示例：{localFolder:6}、{localFolder}
+- {rand:&lt;count&gt;}, 随机数，&lt;count&gt;表示个数，默认为6个，示例：{rand：32}、{rand}
+- {localFolder:&lt;count&gt;}, &lt;count&gt;表示层级 ，默认为1，示例：{localFolder:6}、{localFolder}
 
 
 ---
