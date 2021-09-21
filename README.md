@@ -24,11 +24,11 @@ A PicGo plugin for customizing file name.
 
 format，文件(路径)格式，默认为空，自定义文件路径及文件名，例如：
 
-    fix-dir/{localFolder:2}/{y}/{m}/{d}/{h}-{i}-{s}-{hash}-{origin}-{rand:6}
+    fix-dir/{localFolder:2}/{y}/{m}/{d}/{h}-{i}-{s}-{hash}-{md5:32}-{sha1:40}-{origin}-{rand:6}
     
 上传文件名为`/images/test/localImage.jpg`的文件时，会重命名为
 
-    fix-dir/images/test/2020/07/24/21-40-31-36921a9c364ed4789d4bc684bcb81d62-localImage-fa2c97.jpg
+    fix-dir/images/test/2020/07/24/21-40-31-36921a9c364ed4789d4bc684bcb81d62-36921a9c364ed4789d4bc684bcb81d62-8e3eb6b0dec350d3324840980309028d9d7ebd36-localImage-fa2c97.jpg
 
 
 

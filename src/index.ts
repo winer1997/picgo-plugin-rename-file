@@ -17,7 +17,7 @@ const pluginConfig = ctx => {
       type: 'input',
       alias: '文件(路径)格式',
       default: userConfig.format || '',
-      message: '例如 fix-dir/{localFolder:2}/{y}/{m}/{d}/{h}-{i}-{s}-{hash}-{origin}-{rand:5}',
+      message: '例如 fix-dir/{localFolder:2}/{y}/{m}/{d}/{h}-{i}-{s}-{hash}-{md5:32}-{sha1:40}-{origin}-{rand:5}',
       required: false
     }
   ]
